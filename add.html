@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Додати кредит — Loan Tracker</title>
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="back-btn">← Назад</a>
+  <span style="font-size:15px;font-weight:600">Додати кредит</span>
+</div>
+
+<div class="main-narrow">
+<div class="form-card">
+
+  <div class="form-section">
+    <div class="section-label">Основне</div>
+
+    <div class="field">
+      <label>Назва кредиту <span class="req">*</span></label>
+      <input type="text" id="f-name" placeholder="напр. ПриватБанк — Авто">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Тип кредиту</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-type="annuity">Ануїтетний</button>
+          <button class="toggle-btn" data-type="classic">Класичний</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Категорія</label>
+        <select id="f-category">
+          <option value="auto">🚗 Авто</option>
+          <option value="phone">📱 Техніка</option>
+          <option value="home">🏠 Іпотека</option>
+          <option value="shop">🛒 Споживчий</option>
+          <option value="biz">💼 Бізнес</option>
+          <option value="other">📂 Інше</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Банк / Кредитор</label>
+      <input type="text" id="f-bank" placeholder="ПриватБанк, Monobank...">
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-label">Сума та відсотки</div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Початкова сума <span class="req">*</span></label>
+        <div class="input-wrap">
+          <span class="input-prefix">₴</span>
+          <input type="number" id="f-original" placeholder="120000" min="0">
+        </div>
+      </div>
+      <div class="field">
+        <label>Поточний залишок</label>
+        <div class="input-wrap">
+          <span class="input-prefix">₴</span>
+          <input type="number" id="f-balance" placeholder="= початкова" min="0">
+        </div>
+        <div class="helper">Якщо кредит вже діє — вкажіть залишок</div>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Відсоткова ставка <span class="req">*</span></label>
+        <div class="input-wrap has-suffix">
+          <input type="number" id="f-rate" placeholder="18" min="0" max="200" step="0.1">
+          <span class="input-suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Тип ставки</label>
+        <select id="f-rate-type">
+          <option value="annual">Річна</option>
+          <option value="monthly">Місячна</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-label">Платежі</div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Термін (місяців) <span class="req">*</span></label>
+        <div class="input-wrap has-suffix">
+          <input type="number" id="f-months" placeholder="36" min="1" max="600">
+          <span class="input-suffix">міс.</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Щомісячний платіж</label>
+        <div class="input-wrap">
+          <span class="input-prefix">₴</span>
+          <input type="number" id="f-payment" placeholder="авто" min="0">
+        </div>
+        <div class="helper">Порожньо = розрахується автоматично</div>
+      </div>
+    </div>
+
+    <!-- Авто-розрахунок -->
+    <div class="calc-hint" id="calc-hint">
+      <div>
+        <div class="calc-hint-text">Розрахований платіж (ануїтет)</div>
+        <div class="calc-hint-text" id="calc-hint-desc" style="margin-top:2px">Заповніть суму, ставку і термін</div>
+      </div>
+      <div class="calc-hint-value" id="calc-hint-value">—</div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Дата першого платежу <span class="req">*</span></label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="field">
+        <label>День платежу щомісяця</label>
+        <select id="f-day">
+          <option value="1">1-го числа</option>
+          <option value="5">5-го числа</option>
+          <option value="10">10-го числа</option>
+          <option value="15" selected>15-го числа</option>
+          <option value="20">20-го числа</option>
+          <option value="25">25-го числа</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-label">Додатково</div>
+    <div class="field">
+      <label>Коментар</label>
+      <textarea id="f-comment" placeholder="Нотатки по кредиту..."></textarea>
+    </div>
+    <label class="checkbox-row">
+      <input type="checkbox" id="f-remind" checked>
+      <span>Нагадувати за 3 дні до платежу</span>
+    </label>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="display:flex;gap:12px">
+    <a href="index.html" class="btn btn-ghost" style="flex:1;text-align:center">Скасувати</a>
+    <button class="btn btn-primary" id="btn-save" style="flex:2">💾 Зберегти кредит</button>
+  </div>
+
+</div>
+</div>
+
+<script src="scripts/calc.js"></script>
+<script src="scripts/data.js"></script>
+<script src="scripts/add.js"></script>
+</body>
+</html>

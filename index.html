@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Tracker</title>
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">💳</span> Loan Tracker
+  </a>
+  <div class="header-actions">
+    <a href="add.html" class="btn btn-primary">+ Додати кредит</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ЗВЕДЕННЯ -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-label">Загальний борг</div>
+      <div class="stat-value" id="stat-balance">₴ 0</div>
+      <div class="stat-sub" id="stat-count">0 кредитів</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Платежів цього місяця</div>
+      <div class="stat-value" id="stat-monthly">₴ 0</div>
+      <div class="stat-sub" id="stat-monthly-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Статус</div>
+      <div class="stat-value" style="font-size:15px;padding-top:4px" id="stat-overdue">Все гаразд</div>
+    </div>
+  </div>
+
+  <!-- ФІЛЬТР -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-filter="all">Всі</button>
+    <button class="nav-tab" data-filter="active">Активні</button>
+    <button class="nav-tab" data-filter="closed">Закриті</button>
+  </div>
+
+  <!-- КАРТКИ -->
+  <div class="loans-grid" id="loans-grid"></div>
+
+  <!-- НАЙБЛИЖЧІ ПЛАТЕЖІ -->
+  <div style="margin-top:28px">
+    <div class="section-head">
+      <div class="section-title">Найближчі платежі</div>
+    </div>
+    <div id="upcoming-list"></div>
+  </div>
+
+</div>
+
+<!-- МОДАЛКА: ВНЕСТИ ПЛАТІЖ -->
+<div class="modal-overlay" id="pay-modal">
+  <div class="modal">
+    <div class="modal-title">💳 Внести платіж — <span id="pay-modal-name"></span></div>
+    <div class="field">
+      <label>Сума платежу <span class="req">*</span></label>
+      <div class="input-wrap">
+        <span class="input-prefix">₴</span>
+        <input type="number" id="pay-amount-input" placeholder="0">
+      </div>
+    </div>
+    <div class="field">
+      <label>Дата платежу</label>
+      <input type="date" id="pay-date-input">
+    </div>
+    <div class="field">
+      <label>Нотатка (необов'язково)</label>
+      <input type="text" id="pay-note-input" placeholder="напр. достроковий платіж">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="pay-cancel">Скасувати</button>
+      <button class="btn btn-primary" id="pay-confirm">Підтвердити</button>
+    </div>
+  </div>
+</div>
+
+<script src="scripts/calc.js"></script>
+<script src="scripts/data.js"></script>
+<script src="scripts/dashboard.js"></script>
+</body>
+</html>
