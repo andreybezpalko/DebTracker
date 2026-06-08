@@ -13,13 +13,13 @@
     <span class="logo-icon">💳</span> Loan Tracker
   </a>
   <div class="header-actions">
+    <button class="theme-toggle" id="theme-toggle" title="Змінити тему">🌙</button>
     <a href="add.html" class="btn btn-primary">+ Додати кредит</a>
   </div>
 </div>
 
 <div class="main">
 
-  <!-- ЗВЕДЕННЯ -->
   <div class="stat-grid">
     <div class="stat-card">
       <div class="stat-label">Загальний борг</div>
@@ -37,17 +37,22 @@
     </div>
   </div>
 
-  <!-- ФІЛЬТР -->
-  <div class="nav-tabs">
-    <button class="nav-tab active" data-filter="all">Всі</button>
-    <button class="nav-tab" data-filter="active">Активні</button>
-    <button class="nav-tab" data-filter="closed">Закриті</button>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-filter="all">Всі</button>
+      <button class="nav-tab" data-filter="active">Активні</button>
+      <button class="nav-tab" data-filter="closed">Закриті</button>
+    </div>
+    <select id="sort-select" style="font-size:12px;padding:6px 28px 6px 10px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--sans)">
+      <option value="date">За датою платежу</option>
+      <option value="balance">За залишком</option>
+      <option value="name">За назвою</option>
+      <option value="rate">За ставкою</option>
+    </select>
   </div>
 
-  <!-- КАРТКИ -->
   <div class="loans-grid" id="loans-grid"></div>
 
-  <!-- НАЙБЛИЖЧІ ПЛАТЕЖІ -->
   <div style="margin-top:28px">
     <div class="section-head">
       <div class="section-title">Найближчі платежі</div>
@@ -57,7 +62,7 @@
 
 </div>
 
-<!-- МОДАЛКА: ВНЕСТИ ПЛАТІЖ -->
+<!-- МОДАЛКА ПЛАТЕЖУ -->
 <div class="modal-overlay" id="pay-modal">
   <div class="modal">
     <div class="modal-title">💳 Внести платіж — <span id="pay-modal-name"></span></div>
@@ -83,8 +88,44 @@
   </div>
 </div>
 
+<!-- МОДАЛКА РЕДАГУВАННЯ -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ Редагувати кредит</div>
+    <div class="field">
+      <label>Назва</label>
+      <input type="text" id="edit-name">
+    </div>
+    <div class="field">
+      <label>Залишок боргу</label>
+      <div class="input-wrap"><span class="input-prefix">₴</span>
+        <input type="number" id="edit-balance">
+      </div>
+    </div>
+    <div class="field">
+      <label>Щомісячний платіж</label>
+      <div class="input-wrap"><span class="input-prefix">₴</span>
+        <input type="number" id="edit-payment">
+      </div>
+    </div>
+    <div class="field">
+      <label>Дата наступного платежу</label>
+      <input type="date" id="edit-date">
+    </div>
+    <div class="field">
+      <label>Коментар</label>
+      <input type="text" id="edit-comment">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="edit-cancel">Скасувати</button>
+      <button class="btn btn-primary" id="edit-confirm">Зберегти</button>
+    </div>
+  </div>
+</div>
+
 <script src="scripts/calc.js"></script>
 <script src="scripts/data.js"></script>
+<script src="scripts/theme.js"></script>
 <script src="scripts/dashboard.js"></script>
 </body>
 </html>

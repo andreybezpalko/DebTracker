@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
   const loan = id ? DB.getById(id) : null;
-
   if (!loan) { window.location.href = 'index.html'; return; }
 
   const PAGE_SIZE = 12;
@@ -18,16 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   function init() {
-    const freshLoan = DB.getById(id);
-    stats = Calc.loanStats(freshLoan);
+    const fresh = DB.getById(id);
+    stats = Calc.loanStats(fresh);
     schedule = stats.schedule;
-    renderHeader(freshLoan);
-    renderOverview(freshLoan, stats);
-    renderProgress(freshLoan, stats);
+    renderHeader(fresh);
+    renderOverview(fresh, stats);
+    renderProgress(fresh, stats);
     renderSchedule();
-    renderHistory(freshLoan);
+    renderHistory(fresh);
     bindTabs();
-    bindPayModal(freshLoan);
+    bindPayModal(fresh);
+    bindExport(fresh);
   }
 
   function renderHeader(loan) {
@@ -39,12 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderOverview(loan, stats) {
     const grid = document.getElementById('overview-grid');
     const items = [
-      { label: 'Залишок боргу',        value: Calc.formatMoney(loan.currentBalance), cls: 'accent', sub: 'з ' + Calc.formatMoney(loan.originalAmount) },
-      { label: 'Щомісячний платіж',    value: Calc.formatMoney(loan.monthlyPayment), sub: 'тіло + відсотки' },
-      { label: 'До закриття',          value: stats.monthsRemaining + ' міс.', sub: stats.closingDate ? Calc.formatMonthYear(stats.closingDate) : '—' },
-      { label: 'Сплачено (тіло)',       value: Calc.formatMoney(stats.paidPrincipal), cls: 'success', sub: stats.percentPaid + '% від суми' },
-      { label: 'Сплачено відсотків',   value: Calc.formatMoney(stats.paidInterest), cls: 'warning' },
-      { label: 'Наступний платіж',     value: Calc.formatDate(loan.nextPaymentDate), sub: daysLabel(Calc.daysUntil(loan.nextPaymentDate)) },
+      { label: 'Залишок боргу',       value: Calc.formatMoney(loan.currentBalance), cls: 'accent', sub: 'з ' + Calc.formatMoney(loan.originalAmount) },
+      { label: 'Щомісячний платіж',   value: Calc.formatMoney(loan.monthlyPayment), sub: 'тіло + відсотки' },
+      { label: 'До закриття',         value: stats.monthsRemaining + ' міс.', sub: stats.closingDate ? Calc.formatMonthYear(stats.closingDate) : '—' },
+      { label: 'Сплачено (тіло)',      value: Calc.formatMoney(stats.paidPrincipal), cls: 'success', sub: stats.percentPaid + '% від суми' },
+      { label: 'Сплачено відсотків',  value: Calc.formatMoney(stats.paidInterest), cls: 'warning' },
+      { label: 'Наступний платіж',    value: Calc.formatDate(loan.nextPaymentDate), sub: daysLabel(Calc.daysUntil(loan.nextPaymentDate)) },
     ];
     grid.innerHTML = items.map(i => `
       <div class="ov-card">
@@ -65,8 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pct = stats.percentPaid;
     document.getElementById('prog-pct').textContent = pct + '% погашено';
     document.getElementById('prog-fill').style.width = pct + '%';
-    const startDate = loan.payments && loan.payments.length
-      ? loan.payments[0].date : loan.nextPaymentDate;
+    const startDate = loan.payments?.length ? loan.payments[0].date : loan.nextPaymentDate;
     document.getElementById('prog-labels').innerHTML = `
       <span>Початок: ${Calc.formatMonthYear(startDate)}</span>
       <span>Сплачено ${Calc.formatMoney(stats.paidPrincipal + stats.paidInterest)}</span>
@@ -86,16 +85,22 @@ document.addEventListener('DOMContentLoaded', () => {
       overdue: '<span class="pill pill-overdue">⚠️ Прострочено</span>',
     };
 
-    body.innerHTML = page.map(row => `
-      <tr class="${row.status === 'current' ? 'row-current' : row.status === 'overdue' ? 'row-overdue' : ''}">
+    body.innerHTML = page.map((row, i) => {
+      const globalIdx = start + i;
+      const canPay = row.status === 'current' || row.status === 'overdue';
+      return `<tr class="${row.status === 'current' ? 'row-current' : row.status === 'overdue' ? 'row-overdue' : ''}">
         <td class="td-num">${row.month}</td>
         <td>${Calc.formatDate(row.date)}</td>
         <td class="td-mono">₴ ${row.payment.toLocaleString('uk-UA')}</td>
         <td class="td-mono">${row.principal.toLocaleString('uk-UA')}</td>
         <td class="td-interest">${row.interest.toLocaleString('uk-UA')}</td>
         <td class="td-mono" style="font-weight:500">${row.balance.toLocaleString('uk-UA')}</td>
-        <td>${STATUS[row.status] || ''}</td>
-      </tr>`).join('');
+        <td>
+          ${STATUS[row.status] || ''}
+          ${canPay ? `<button class="btn btn-primary btn-sm" style="margin-left:6px;padding:3px 8px;font-size:10px" data-idx="${globalIdx}" onclick="markPaid(${globalIdx})">Сплатити</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
 
     document.getElementById('schedule-info').textContent =
       `Показано ${start + 1}–${Math.min(start + PAGE_SIZE, total)} з ${total} платежів`;
@@ -110,19 +115,33 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => { currentPage = parseInt(btn.dataset.p); renderSchedule(); });
     });
 
-    // Підсумки
     document.getElementById('sum-total-interest').textContent = Calc.formatMoney(stats.totalInterest);
     document.getElementById('sum-paid-interest').textContent = Calc.formatMoney(stats.paidInterest);
     document.getElementById('sum-future-interest').textContent = Calc.formatMoney(stats.futureInterest);
   }
 
+  // Позначити платіж як сплачений прямо з таблиці
+  window.markPaid = function(idx) {
+    const row = schedule[idx];
+    if (!row) return;
+    DB.addPayment(id, {
+      amount: row.payment,
+      date: row.date,
+      note: 'зі графіку'
+    });
+    init();
+    showToast('Платіж ' + Calc.formatDate(row.date) + ' позначено як сплачений ✓', 'success');
+  };
+
   function renderHistory(loan) {
     const list = document.getElementById('history-list');
     const payments = (loan.payments || []).slice().reverse();
     if (!payments.length) {
-      list.innerHTML = `<div class="empty"><div class="empty-icon">🧾</div>
+      list.innerHTML = `<div class="empty">
+        <div class="empty-icon">🧾</div>
         <div class="empty-title">Платежів ще немає</div>
-        <div class="empty-sub">Внесіть перший платіж через кнопку вгорі</div></div>`;
+        <div class="empty-sub">Внесіть перший платіж через кнопку вгорі</div>
+      </div>`;
       return;
     }
     list.innerHTML = payments.map(p => `
@@ -141,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById('tab-schedule').style.display = tab.dataset.tab === 'schedule' ? '' : 'none';
-        document.getElementById('tab-history').style.display = tab.dataset.tab === 'history' ? '' : 'none';
+        document.getElementById('tab-history').style.display  = tab.dataset.tab === 'history'  ? '' : 'none';
       });
     });
   }
@@ -149,24 +168,56 @@ document.addEventListener('DOMContentLoaded', () => {
   function bindPayModal(loan) {
     document.getElementById('pay-amount').value = loan.monthlyPayment;
     document.getElementById('pay-date').value = new Date().toISOString().slice(0, 10);
-
-    const openModal = () => document.getElementById('pay-modal').classList.add('open');
-    const closeModal = () => document.getElementById('pay-modal').classList.remove('open');
-
-    document.getElementById('btn-pay-header').addEventListener('click', openModal);
-    document.getElementById('pay-cancel').addEventListener('click', closeModal);
-    document.getElementById('pay-modal').addEventListener('click', e => { if (e.target.id === 'pay-modal') closeModal(); });
-
+    const open  = () => document.getElementById('pay-modal').classList.add('open');
+    const close = () => document.getElementById('pay-modal').classList.remove('open');
+    document.getElementById('btn-pay-header').addEventListener('click', open);
+    document.getElementById('pay-cancel').addEventListener('click', close);
+    document.getElementById('pay-modal').addEventListener('click', e => { if (e.target.id === 'pay-modal') close(); });
     document.getElementById('pay-confirm').addEventListener('click', () => {
       const amount = parseFloat(document.getElementById('pay-amount').value);
       const date = document.getElementById('pay-date').value;
       const note = document.getElementById('pay-note').value;
       if (!amount || amount <= 0) { showToast('Введіть суму', 'error'); return; }
       DB.addPayment(id, { amount, date, note });
-      closeModal();
+      close();
       init();
       showToast('Платіж внесено ✓', 'success');
     });
+  }
+
+  // ─── ЕКСПОРТ CSV ───────────────────────────
+  function bindExport(loan) {
+    // Додаємо кнопку експорту в DOM
+    const block = document.querySelector('.progress-block');
+    if (!block) return;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost btn-sm';
+    btn.style.marginTop = '12px';
+    btn.textContent = '📥 Експорт CSV';
+    block.appendChild(btn);
+    btn.addEventListener('click', () => exportCSV(loan));
+  }
+
+  function exportCSV(loan) {
+    const fresh = DB.getById(id);
+    const s = Calc.loanStats(fresh);
+    const headers = ['№','Дата','Платіж','Тіло','Відсотки','Залишок','Статус'];
+    const rows = s.schedule.map(r => [
+      r.month,
+      r.date,
+      r.payment,
+      r.principal,
+      r.interest,
+      r.balance,
+      r.status === 'paid' ? 'Сплачено' : r.status === 'current' ? 'Поточний' : r.status === 'overdue' ? 'Прострочено' : 'Майбутній'
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(';')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = loan.name.replace(/[^a-zA-Zа-яА-ЯіІїЇ0-9]/g, '_') + '_графік.csv';
+    a.click();
+    showToast('CSV збережено ✓', 'success');
   }
 
   init();
