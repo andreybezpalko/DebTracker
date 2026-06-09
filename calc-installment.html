@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор розстрочки — Loan Tracker</title>
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="back-btn">← Назад</a>
+  <span style="font-size:15px;font-weight:600">Калькулятор розстрочки</span>
+  <div class="header-actions">
+    <button class="theme-toggle" id="theme-toggle" title="Змінити тему">🌙</button>
+  </div>
+</div>
+
+<div class="main-narrow">
+
+  <div class="form-card">
+    <div class="form-section">
+      <div class="section-label">Параметри розстрочки</div>
+
+      <div class="field">
+        <label>Сума розстрочки <span class="req">*</span></label>
+        <div class="input-wrap">
+          <span class="input-prefix">₴</span>
+          <input type="number" id="c-amount" placeholder="1980" min="1" step="0.01">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Кількість місяців <span class="req">*</span></label>
+          <div class="input-wrap has-suffix">
+            <input type="number" id="c-months" placeholder="6" min="1" max="60">
+            <span class="input-suffix">міс.</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Комісія банку</label>
+          <div class="input-wrap has-suffix">
+            <input type="number" id="c-rate" value="1.9" min="0" max="20" step="0.01">
+            <span class="input-suffix">% / міс</span>
+          </div>
+          <div class="helper">За замовчуванням 1.9% з початкової суми</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- РЕЗУЛЬТАТ -->
+    <div id="result" style="display:none">
+      <div class="section-label">Результат</div>
+
+      <div class="overview-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px">
+        <div class="ov-card">
+          <div class="ov-label">Щомісячний платіж</div>
+          <div class="ov-value accent" id="r-payment">—</div>
+          <div class="ov-sub" id="r-payment-sub">тіло + комісія</div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-label">Загальна переплата</div>
+          <div class="ov-value danger" id="r-overpay">—</div>
+          <div class="ov-sub" id="r-overpay-pct">% від суми</div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-label">Всього виплатиш</div>
+          <div class="ov-value" id="r-total">—</div>
+          <div class="ov-sub">за весь термін</div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-label">Реальна річна ставка</div>
+          <div class="ov-value danger" id="r-irr">—</div>
+          <div class="ov-sub">РРПС (НБУ)</div>
+        </div>
+      </div>
+
+      <!-- ТАБЛИЦЯ ПЛАТЕЖІВ -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Тіло</th>
+              <th>Комісія</th>
+              <th>Платіж</th>
+              <th>Залишок</th>
+            </tr>
+          </thead>
+          <tbody id="r-table"></tbody>
+        </table>
+      </div>
+
+      <!-- ПОРІВНЯННЯ -->
+      <div class="calc-hint" style="margin-bottom:16px">
+        <div>
+          <div class="calc-hint-text" style="font-weight:600">⚠️ Підводний камінь</div>
+          <div class="calc-hint-text" id="r-trap" style="margin-top:4px;line-height:1.5"></div>
+        </div>
+      </div>
+
+      <!-- КНОПКА ДОДАТИ В ТРЕКЕР -->
+      <button class="btn btn-primary" id="btn-add-to-tracker" style="width:100%">
+        + Додати цю розстрочку в трекер
+      </button>
+    </div>
+
+    <div id="placeholder" style="text-align:center;padding:32px 0;color:var(--muted)">
+      <div style="font-size:32px;margin-bottom:12px">🧮</div>
+      <div style="font-size:14px">Введіть суму і кількість місяців</div>
+    </div>
+
+  </div>
+</div>
+
+<script src="scripts/calc.js"></script>
+<script src="scripts/data.js"></script>
+<script src="scripts/theme.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const inputs = ['c-amount', 'c-months', 'c-rate'];
+  inputs.forEach(id => document.getElementById(id).addEventListener('input', calculate));
+
+  function calculate() {
+    const amount  = parseFloat(document.getElementById('c-amount').value);
+    const months  = parseInt(document.getElementById('c-months').value);
+    const ratePct = parseFloat(document.getElementById('c-rate').value) || 1.9;
+
+    if (!amount || !months || amount <= 0 || months <= 0) {
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('placeholder').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('placeholder').style.display = 'none';
+
+    const body       = amount / months;                    // тіло щомісяця
+    const commission = amount * ratePct / 100;             // комісія щомісяця (з початкової суми)
+    const payment    = body + commission;                  // щомісячний платіж
+    const totalPay   = payment * months;                   // всього виплатиш
+    const overpay    = totalPay - amount;                  // переплата
+    const overpayPct = (overpay / amount * 100).toFixed(1);
+
+    // РРПС — підбір IRR методом Ньютона
+    const irr = calcIRR(amount, payment, months);
+    const irrAnnual = (irr * 12 * 100).toFixed(1);
+
+    // Заповнення
+    document.getElementById('r-payment').textContent = fmt(payment);
+    document.getElementById('r-payment-sub').textContent =
+      `тіло ${fmt(body)} + комісія ${fmt(commission)}`;
+    document.getElementById('r-overpay').textContent = fmt(overpay);
+    document.getElementById('r-overpay-pct').textContent = overpayPct + '% від суми';
+    document.getElementById('r-total').textContent = fmt(totalPay);
+    document.getElementById('r-irr').textContent = irrAnnual + '% річних';
+
+    document.getElementById('r-trap').textContent =
+      `Комісія ${fmt(commission)} береться щомісяця з початкової суми ${fmt(amount)}, ` +
+      `навіть коли в останній місяць борг лише ${fmt(body)}. ` +
+      `Тому реальна ставка ${irrAnnual}% — майже вдвічі вища за номінальну ${(ratePct * 12).toFixed(1)}% річних.`;
+
+    // Таблиця
+    let balance = amount;
+    const rows = [];
+    for (let i = 1; i <= months; i++) {
+      balance = Math.max(0, balance - body);
+      rows.push(`<tr ${i === 1 ? 'class="row-current"' : ''}>
+        <td class="td-num">${i}</td>
+        <td class="td-mono">${fmt(body)}</td>
+        <td class="td-mono" style="color:var(--danger)">${fmt(commission)}</td>
+        <td class="td-mono" style="font-weight:600">${fmt(payment)}</td>
+        <td class="td-mono">${fmt(balance)}</td>
+      </tr>`);
+    }
+    document.getElementById('r-table').innerHTML = rows.join('');
+
+    // Кнопка — додати в трекер
+    document.getElementById('btn-add-to-tracker').onclick = () => {
+      // Зберігаємо параметри і переходимо на форму
+      sessionStorage.setItem('prefill', JSON.stringify({
+        name: `Розстрочка ${fmt(amount)} / ${months} міс.`,
+        originalAmount: amount,
+        currentBalance: amount,
+        rate: (ratePct * 12).toFixed(2),
+        rateType: 'annual',
+        monthlyPayment: payment.toFixed(2),
+        totalMonths: months,
+        category: 'shop'
+      }));
+      window.location.href = 'add.html?prefill=1';
+    };
+  }
+
+  // IRR методом Ньютона (місячна ставка)
+  function calcIRR(pv, pmt, n) {
+    let r = 0.03;
+    for (let i = 0; i < 100; i++) {
+      const f  = pv - pmt * (1 - Math.pow(1 + r, -n)) / r;
+      const df = pmt * (
+        (1 - Math.pow(1 + r, -n)) / (r * r) -
+        n * Math.pow(1 + r, -n - 1) / r
+      );
+      const rNew = r - f / df;
+      if (Math.abs(rNew - r) < 1e-8) return rNew;
+      r = rNew;
+    }
+    return r;
+  }
+
+  function fmt(n) {
+    return '₴\u00a0' + n.toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+});
+</script>
+</body>
+</html>

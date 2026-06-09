@@ -99,3 +99,21 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => t.remove(), 3000);
   }
 });
+
+// Prefill з калькулятора розстрочки
+(function() {
+  const raw = sessionStorage.getItem('prefill');
+  if (!raw || !window.location.search.includes('prefill')) return;
+  try {
+    const d = JSON.parse(raw);
+    sessionStorage.removeItem('prefill');
+    if (d.name)           document.getElementById('f-name').value      = d.name;
+    if (d.originalAmount) document.getElementById('f-original').value  = d.originalAmount;
+    if (d.currentBalance) document.getElementById('f-balance').value   = d.currentBalance;
+    if (d.rate)           document.getElementById('f-rate').value      = d.rate;
+    if (d.monthlyPayment) document.getElementById('f-payment').value   = d.monthlyPayment;
+    if (d.totalMonths)    document.getElementById('f-months').value    = d.totalMonths;
+    if (d.category)       document.getElementById('f-category').value  = d.category;
+    if (d.rateType)       document.getElementById('f-rate-type').value = d.rateType;
+  } catch(e) {}
+})();
