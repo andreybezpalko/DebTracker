@@ -10,10 +10,10 @@
 
 <div class="header">
   <a href="index.html" class="back-btn">← Назад</a>
-  <span style="font-size:15px;font-weight:600" id="page-title">Кредит</span>
+  <span class="page-heading" id="page-title">Кредит</span>
   <div class="header-actions">
     <button class="theme-toggle" id="theme-toggle" title="Змінити тему">🌙</button>
-    <span class="btn btn-ghost btn-sm" id="header-badge" style="cursor:default"></span>
+    <span class="btn btn-ghost btn-sm is-static" id="header-badge"></span>
     <button class="btn btn-primary btn-sm" id="btn-pay-header">💳 Внести платіж</button>
   </div>
 </div>
@@ -24,8 +24,8 @@
 
   <div class="progress-block">
     <div class="prog-header">
-      <span style="font-size:13px;font-weight:500">Прогрес погашення</span>
-      <span style="font-size:13px;font-weight:600;color:var(--accent);font-family:var(--mono)" id="prog-pct">0%</span>
+      <span class="prog-title">Прогрес погашення</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
     </div>
     <div class="prog-bar-full">
       <div class="prog-fill-full" id="prog-fill" style="width:0%"></div>
@@ -62,11 +62,11 @@
     <div class="sum-grid">
       <div class="sum-card">
         <div class="sum-label">Загальна переплата</div>
-        <div class="sum-val" style="color:var(--danger)" id="sum-total-interest">—</div>
+        <div class="sum-val text-danger" id="sum-total-interest">—</div>
       </div>
       <div class="sum-card">
         <div class="sum-label">Вже сплачено відсотків</div>
-        <div class="sum-val" style="color:var(--warning)" id="sum-paid-interest">—</div>
+        <div class="sum-val text-warning" id="sum-paid-interest">—</div>
       </div>
       <div class="sum-card">
         <div class="sum-label">Залишилось відсотків</div>

@@ -94,10 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="td-mono">₴ ${row.payment.toLocaleString('uk-UA')}</td>
         <td class="td-mono">${row.principal.toLocaleString('uk-UA')}</td>
         <td class="td-interest">${row.interest.toLocaleString('uk-UA')}</td>
-        <td class="td-mono" style="font-weight:500">${row.balance.toLocaleString('uk-UA')}</td>
+        <td class="td-mono text-medium">${row.balance.toLocaleString('uk-UA')}</td>
         <td>
           ${STATUS[row.status] || ''}
-          ${canPay ? `<button class="btn btn-primary btn-sm" style="margin-left:6px;padding:3px 8px;font-size:10px" data-idx="${globalIdx}" onclick="markPaid(${globalIdx})">Сплатити</button>` : ''}
+          ${canPay ? `<button class="btn btn-primary btn-sm inline-pay-btn" data-idx="${globalIdx}" onclick="markPaid(${globalIdx})">Сплатити</button>` : ''}
         </td>
       </tr>`;
     }).join('');
@@ -146,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     list.innerHTML = payments.map(p => `
       <div class="payment-row">
-        <div class="pay-icon" style="background:var(--success-bg)">💚</div>
-        <div>
+        <div class="pay-icon icon-success">💚</div>
+        <div class="pay-main">
           <div class="pay-name">${Calc.formatMoney(p.amount)}</div>
           <div class="pay-date">${Calc.formatDate(p.date)}${p.note ? ' · ' + p.note : ''}</div>
         </div>
@@ -191,8 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const block = document.querySelector('.progress-block');
     if (!block) return;
     const btn = document.createElement('button');
-    btn.className = 'btn btn-ghost btn-sm';
-    btn.style.marginTop = '12px';
+    btn.className = 'btn btn-ghost btn-sm export-btn';
     btn.textContent = '📥 Експорт CSV';
     block.appendChild(btn);
     btn.addEventListener('click', () => exportCSV(loan));

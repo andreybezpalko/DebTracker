@@ -34,17 +34,17 @@
     </div>
     <div class="stat-card">
       <div class="stat-label">Статус</div>
-      <div class="stat-value" style="font-size:15px;padding-top:4px" id="stat-overdue">Все гаразд</div>
+      <div class="stat-value compact" id="stat-overdue">Все гаразд</div>
     </div>
   </div>
 
-  <div style="display:flex;align-items:center;margin-bottom:18px;gap:12px">
-    <div class="nav-tabs" style="margin-bottom:0;flex-shrink:0">
+  <div class="toolbar-row">
+    <div class="nav-tabs">
       <button class="nav-tab active" data-filter="all">Всі</button>
       <button class="nav-tab" data-filter="active">Активні</button>
       <button class="nav-tab" data-filter="closed">Закриті</button>
     </div>
-    <select id="sort-select" style="font-size:13px;padding:0 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--sans);font-weight:500;width:160px;flex-shrink:0;height:41px;appearance:none;-webkit-appearance:none;cursor:pointer;text-align:center">
+    <select id="sort-select" class="sort-select">
       <option value="date">За датою платежу</option>
       <option value="balance">За залишком</option>
       <option value="name">За назвою</option>
@@ -54,7 +54,7 @@
 
   <div class="loans-grid" id="loans-grid"></div>
 
-  <div style="margin-top:28px">
+  <div class="section-spaced">
     <div class="section-head">
       <div class="section-title">Найближчі платежі</div>
     </div>

@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loans = sortLoans(loans, activeSort);
 
     if (!loans.length) {
-      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      grid.innerHTML = `<div class="empty grid-span-all">
         <div class="empty-icon">💳</div>
         <div class="empty-title">Кредитів поки немає</div>
         <div class="empty-sub">Додайте перший кредит щоб почати відстеження</div>
@@ -110,11 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return `<div class="loan-card ${isOverdue ? 'overdue' : ''}">
       <div class="card-head">
-        <div>
+        <div class="card-title-wrap">
           <div class="card-badge ${isOverdue ? 'badge-overdue' : cat.cls}">${isOverdue ? '⚠️ Прострочено' : cat.icon + ' ' + cat.label}</div>
           <div class="card-name">${loan.name}</div>
         </div>
-        <div style="display:flex;gap:4px">
+        <div class="card-tools">
           <button class="card-menu-btn btn-edit" data-id="${loan.id}" title="Редагувати">✏️</button>
           <button class="card-menu-btn btn-del" data-id="${loan.id}" title="Видалити">🗑</button>
         </div>
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const list = document.getElementById('upcoming-list');
     const upcoming = DB.upcomingPayments(5);
     if (!upcoming.length) {
-      list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0">Немає кредитів</div>';
+      list.innerHTML = '<div class="muted-note">Немає кредитів</div>';
       return;
     }
     list.innerHTML = upcoming.map(loan => {
@@ -158,8 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (days < 0)      { pillCls = 'pay-pill-over'; pillLabel = 'Прострочено'; }
       else if (days <= 7){ pillCls = 'pay-pill-soon'; pillLabel = days === 0 ? 'Сьогодні' : days + ' дн.'; }
       return `<div class="payment-row">
-        <div class="pay-icon" style="background:var(--surface2)">${cat.icon}</div>
-        <div>
+        <div class="pay-icon icon-surface">${cat.icon}</div>
+        <div class="pay-main">
           <div class="pay-name">${loan.name}</div>
           <div class="pay-date">${Calc.formatDate(loan.nextPaymentDate)}</div>
         </div>

@@ -10,7 +10,7 @@
 
 <div class="header">
   <a href="index.html" class="back-btn">← Назад</a>
-  <span style="font-size:15px;font-weight:600">Калькулятор розстрочки</span>
+  <span class="page-heading">Калькулятор розстрочки</span>
   <div class="header-actions">
     <button class="theme-toggle" id="theme-toggle" title="Змінити тему">🌙</button>
   </div>
@@ -55,7 +55,7 @@
     <div id="result" style="display:none">
       <div class="section-label">Результат</div>
 
-      <div class="overview-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px">
+      <div class="overview-grid two-col">
         <div class="ov-card">
           <div class="ov-label">Щомісячний платіж</div>
           <div class="ov-value accent" id="r-payment">—</div>
@@ -95,22 +95,22 @@
       </div>
 
       <!-- ПОРІВНЯННЯ -->
-      <div class="calc-hint" style="margin-bottom:16px">
+      <div class="calc-hint calc-hint-spaced">
         <div>
-          <div class="calc-hint-text" style="font-weight:600">⚠️ Підводний камінь</div>
-          <div class="calc-hint-text" id="r-trap" style="margin-top:4px;line-height:1.5"></div>
+          <div class="calc-hint-text calc-trap-title">⚠️ Підводний камінь</div>
+          <div class="calc-hint-text calc-trap-text" id="r-trap"></div>
         </div>
       </div>
 
       <!-- КНОПКА ДОДАТИ В ТРЕКЕР -->
-      <button class="btn btn-primary" id="btn-add-to-tracker" style="width:100%">
+      <button class="btn btn-primary full-width" id="btn-add-to-tracker">
         + Додати цю розстрочку в трекер
       </button>
     </div>
 
-    <div id="placeholder" style="text-align:center;padding:32px 0;color:var(--muted)">
-      <div style="font-size:32px;margin-bottom:12px">🧮</div>
-      <div style="font-size:14px">Введіть суму і кількість місяців</div>
+    <div id="placeholder" class="placeholder-state">
+      <div class="placeholder-icon">🧮</div>
+      <div class="placeholder-text">Введіть суму і кількість місяців</div>
     </div>
 
   </div>
@@ -171,8 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
       rows.push(`<tr ${i === 1 ? 'class="row-current"' : ''}>
         <td class="td-num">${i}</td>
         <td class="td-mono">${fmt(body)}</td>
-        <td class="td-mono" style="color:var(--danger)">${fmt(commission)}</td>
-        <td class="td-mono" style="font-weight:600">${fmt(payment)}</td>
+        <td class="td-mono text-danger">${fmt(commission)}</td>
+        <td class="td-mono text-strong">${fmt(payment)}</td>
         <td class="td-mono">${fmt(balance)}</td>
       </tr>`);
     }
