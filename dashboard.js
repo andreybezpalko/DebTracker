@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="card-details">
         <div><div class="detail-label">Щомісяця</div><div class="detail-val">${Calc.formatMoney(loan.monthlyPayment)}</div></div>
-        <div><div class="detail-label">Ставка</div><div class="detail-val">${loan.rate}%</div></div>
+        <div><div class="detail-label">Ставка</div><div class="detail-val">${loan.loanType === 'installment' ? (loan.commissionRate || (loan.rate/12).toFixed(1)) + '% / міс.' : loan.rate + '% річних'}</div></div>
         <div><div class="detail-label">Наступний платіж</div><div class="detail-val ${isOverdue ? 'danger' : ''}">${Calc.formatDate(loan.nextPaymentDate)}</div></div>
         <div><div class="detail-label">Банк</div><div class="detail-val">${loan.bank || '—'}</div></div>
       </div>
