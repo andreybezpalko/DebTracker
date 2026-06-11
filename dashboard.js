@@ -230,11 +230,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('edit-cancel')?.addEventListener('click', closeEditModal);
     document.getElementById('edit-confirm')?.addEventListener('click', () => {
       if (!editingId) return;
+      const loan = DB.getById(editingId);
+      const rateVal = parseFloat(document.getElementById('edit-rate').value);
       DB.update(editingId, {
         name:            document.getElementById('edit-name').value.trim(),
         currentBalance:  parseFloat(document.getElementById('edit-balance').value),
         monthlyPayment:  parseFloat(document.getElementById('edit-payment').value),
-        rate:            parseFloat(document.getElementById('edit-rate').value),
+        rate:            loan.loanType === 'installment' ? rateVal * 12 : rateVal,
+        commissionRate:  loan.loanType === 'installment' ? rateVal : null,
         rateType:        document.getElementById('edit-rate-type').value,
         nextPaymentDate: document.getElementById('edit-date').value,
         comment:         document.getElementById('edit-comment').value.trim(),
@@ -252,7 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('edit-name').value        = loan.name;
     document.getElementById('edit-balance').value     = loan.currentBalance;
     document.getElementById('edit-payment').value     = loan.monthlyPayment;
-    document.getElementById('edit-rate').value        = loan.rate;
+    document.getElementById('edit-rate').value        = loan.loanType === 'installment'
+      ? (loan.commissionRate || (loan.rate / 12).toFixed(1))
+      : loan.rate;
     document.getElementById('edit-rate-type').value   = loan.rateType || 'annual';
     document.getElementById('edit-date').value        = loan.nextPaymentDate;
     document.getElementById('edit-comment').value     = loan.comment || '';
