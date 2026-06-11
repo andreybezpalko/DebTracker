@@ -1,7 +1,7 @@
 // add.js — логіка форми додавання кредиту
 
 document.addEventListener('DOMContentLoaded', () => {
-  let loanType = 'annuity';
+  let loanType = 'classic';
 
   const HINTS = {
     annuity:     'Рівний платіж, відсотки нараховуються на залишок боргу',
